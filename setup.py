@@ -10,6 +10,11 @@ from Cython.Build import cythonize
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
+def is_mingw():
+    """Check if Python is running under MinGW."""
+    return sys.platform == "win32" and platform.python_compiler().startswith("GCC")
+
+
 def print_error(*s: str):
     print("\033[91m {}\033[00m".format(' '.join(s)))
 
@@ -87,12 +92,20 @@ def main(debug: bool):
             extra_link_args = []
 
     elif platform.system() == 'Windows':
-        if debug:
-            extra_compile_args = ['/std:c++17', '/Zi']
-            extra_link_args = ['/DEBUG:FULL']
+        if is_mingw():
+            if debug:
+                extra_compile_args = ['-std=c++17', '-O0', '-g']
+                extra_link_args = ['-lws2_32', '-lz']
+            else:
+                extra_compile_args = ['-std=c++17', '-O3']
+                extra_link_args = ['-lws2_32', '-lz']
         else:
-            extra_compile_args = ['/std:c++17']
-            extra_link_args = []
+            if debug:
+                extra_compile_args = ['/std:c++17', '/Zi']
+                extra_link_args = ['/DEBUG:FULL']
+            else:
+                extra_compile_args = ['/std:c++17']
+                extra_link_args = []
     else:
         if debug:
             extra_compile_args = ['-std=c++17', '-O0', '-g']
