@@ -331,7 +331,7 @@ cdef class CASCHandler:
     cdef char* region
     cdef char* product
 
-    def __cinit__(self, path: str, locale_flags: int, is_online: bool = False):
+    def __cinit__(self, path: str, locale_flags: int, is_online: bool = False, product = None):
 
         """
         Intialize CASC Handler
@@ -361,8 +361,11 @@ cdef class CASCHandler:
         self.region = <char *>malloc(3)
         strcpy(self.region, 'eu'.encode('ascii'))
 
-        self.product = <char *>malloc(4)
-        strcpy(self.product, 'wow'.encode('ascii'))
+        if product is None:
+            self.product = NULL
+        else:
+            self.product = <char *>malloc(4)
+            strcpy(self.product, product.encode('ascii'))
 
         self.p_args.Size = sizeof(CASC_OPEN_STORAGE_ARGS)
         self.p_args.szLocalPath = self.c_path
